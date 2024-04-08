@@ -45,8 +45,21 @@ async fn main() -> Result<()> {
         if let Ok(mut file) = File::open(&path).await {
             let mut buf = String::new();
             if file.read_to_string(&mut buf).await.is_ok() {
-                if let Ok(intensity) = buf.parse::<f64>() {
-                    current_intensity += intensity;
+                println!("{}", buf);
+                let mut args = buf.split(" ");
+                match args.next() {
+                    Some("v") =>  if let Some(Ok(intensity)) = args.next().map(str::parse::<f64>) {
+                        current_intensity += intensity;
+                        println!("{}", intensity);
+                    },
+                    Some("s") => {
+                        for device in client.devices() {
+                            device.vibrate(&ScalarValueCommand::ScalarValue(0.0)).await
+                            .into_diagnostic()?;
+                        }
+                        current_intensity = 0.0;
+                    },
+                    _ => unimplemented!(),
                 }
             }
             fs::remove_file(&path).await.into_diagnostic()?;
@@ -60,6 +73,12 @@ async fn main() -> Result<()> {
                     .into_diagnostic()?;
             }
             current_intensity -= 0.05;
+            if current_intensity <= 0.0 {
+                for device in client.devices() {
+                    device.vibrate(&ScalarValueCommand::ScalarValue(0.0)).await
+                    .into_diagnostic()?;
+                }
+            }
         }
 
         thread::sleep(Duration::from_millis(50));

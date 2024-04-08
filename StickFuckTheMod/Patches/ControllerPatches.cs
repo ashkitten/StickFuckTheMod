@@ -21,7 +21,19 @@ class ControllerPatches
 			float vibrationAmount = damageTaken / (healthHandler.health + damageTaken);
 
 			Plugin.Log.LogInfo($"vibrate {vibrationAmount}");
-			File.WriteAllText("buttplug.commands", $"{vibrationAmount}");
+			File.WriteAllText(".buttplug.commands", $"v {vibrationAmount}");
+			File.Move(".buttplug.commands", "buttplug.commands");
+		}
+	}
+
+	public static void OnDeathMethodPrefix(Controller __instance)
+	{
+		var localPlayerID = GameManager.Instance.mMultiplayerManager.LocalPlayerIndex;
+		if (__instance.playerID == localPlayerID)
+		{
+			Plugin.Log.LogInfo("died");
+			File.WriteAllText(".buttplug.commands", "v 100000.0");
+			File.Move(".buttplug.commands", "buttplug.commands");
 		}
 	}
 }

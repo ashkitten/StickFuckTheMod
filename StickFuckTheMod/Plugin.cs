@@ -19,5 +19,6 @@ public class Plugin : BaseUnityPlugin
 
         Harmony harmony = new(PluginInfo.PLUGIN_GUID);
         ControllerPatches.Patch(harmony);
+		GameManagerPatches.Patch(harmony);
     }
 }
